@@ -9,14 +9,17 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import TablaProductos from "../components/Productos/TablaProductos";
-import ModalRegistroProducto from "../components/Productos/ModalRegistroProducto";
-import ModalEdicionProducto from "../components/Productos/ModalEdicionProducto";
-import ModalEliminacionProducto from "../components/Productos/ModalEliminacionProducto";
+
+import TablaProductos from "../components/productos/TablaProductos";
+import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
+import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
+import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 
 const Productos = () => {
-  // Estados para manejo de datos
   const [productos, setProductos] = useState([]);
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -29,23 +32,27 @@ const Productos = () => {
   });
   const [productoEditado, setProductoEditado] = useState(null);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  // Referencia a las colecciones en Firestore
   const productosCollection = collection(db, "productos");
   const categoriasCollection = collection(db, "categorias");
 
-  // Función para obtener todas las categorías y productos de Firestore
+  const paginatedProductos = productosFiltrados.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const fetchData = async () => {
     try {
-      // Obtener productos
       const productosData = await getDocs(productosCollection);
       const fetchedProductos = productosData.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
       setProductos(fetchedProductos);
+      setProductosFiltrados(fetchedProductos);
 
-      // Obtener categorías
       const categoriasData = await getDocs(categoriasCollection);
       const fetchedCategorias = categoriasData.docs.map((doc) => ({
         ...doc.data(),
@@ -57,24 +64,34 @@ const Productos = () => {
     }
   };
 
-  // Hook useEffect para carga inicial de datos
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Manejador de cambios en inputs del formulario de nuevo producto
+  const handleSearchChange = (e) => {
+    const text = e.target.value.toLowerCase();
+    setSearchText(text);
+    setCurrentPage(1); // Resetear página al buscar
+    setProductosFiltrados(
+      productos.filter(
+        (producto) =>
+          producto.nombre.toLowerCase().includes(text) ||
+          producto.precio.toLowerCase().includes(text) ||
+          producto.categoria.toLowerCase().includes(text)
+      )
+    );
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNuevoProducto((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Manejador de cambios en inputs del formulario de edición
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
     setProductoEditado((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Manejador para la carga de imágenes
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -97,7 +114,6 @@ const Productos = () => {
     }
   };
 
-  // Función para agregar un nuevo producto (CREATE)
   const handleAddProducto = async () => {
     if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.categoria) {
       alert("Por favor, completa todos los campos requeridos.");
@@ -113,23 +129,25 @@ const Productos = () => {
     }
   };
 
-  // Función para actualizar un producto existente (UPDATE)
   const handleEditProducto = async () => {
-    if (!productoEditado.nombre || !productoEditado.precio || !productoEditado.categoria) {
-      alert("Por favor, completa todos los campos requeridos.");
-      return;
-    }
     try {
       const productoRef = doc(db, "productos", productoEditado.id);
-      await updateDoc(productoRef, productoEditado);
+      await updateDoc(productoRef, {
+        nombre: productoEditado.nombre,
+        precio: productoEditado.precio,
+        categoria: productoEditado.categoria,
+        imagen: productoEditado.imagen,
+      });
+
+      alert("Producto actualizado correctamente");
       setShowEditModal(false);
-      await fetchData();
+      fetchData();
     } catch (error) {
-      console.error("Error al actualizar producto:", error);
+      console.error("Error al actualizar el producto:", error);
+      alert("Error al actualizar el producto");
     }
   };
 
-  // Función para eliminar un producto (DELETE)
   const handleDeleteProducto = async () => {
     if (productoAEliminar) {
       try {
@@ -143,19 +161,16 @@ const Productos = () => {
     }
   };
 
-  // Función para abrir el modal de edición con datos prellenados
   const openEditModal = (producto) => {
     setProductoEditado({ ...producto });
     setShowEditModal(true);
   };
 
-  // Función para abrir el modal de eliminación
   const openDeleteModal = (producto) => {
     setProductoAEliminar(producto);
     setShowDeleteModal(true);
   };
 
-  // Renderizado del componente
   return (
     <Container className="mt-5">
       <br />
@@ -163,10 +178,18 @@ const Productos = () => {
       <Button className="mb-3" onClick={() => setShowModal(true)}>
         Agregar producto
       </Button>
+      <CuadroBusquedas
+        searchText={searchText}
+        handleSearchChange={handleSearchChange}
+      />
       <TablaProductos
-        productos={productos}
         openEditModal={openEditModal}
         openDeleteModal={openDeleteModal}
+        productos={paginatedProductos}
+        totalItems={productosFiltrados.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
       <ModalRegistroProducto
         showModal={showModal}
@@ -196,4 +219,3 @@ const Productos = () => {
 };
 
 export default Productos;
-
