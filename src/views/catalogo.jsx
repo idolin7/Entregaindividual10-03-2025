@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Form, Col } from "react-bootstrap";
 import { db } from "../database/firebaseconfig";
 import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc
+  collection, getDocs, doc, updateDoc
 } from "firebase/firestore";
 import TarjetaProducto from "../components/catalogo/TarjetaProducto";
-import ModalEdicionProducto from "../components/Productos/ModalEdicionProducto";
+import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 
-const Catalogo = () => {
+function Catalogo() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
@@ -121,8 +119,7 @@ const Catalogo = () => {
             <TarjetaProducto
               key={producto.id}
               producto={producto}
-              openEditModal={openEditModal}
-            />
+              openEditModal={openEditModal} />
           ))
         ) : (
           <p>No hay productos en esta categoría.</p>
@@ -137,10 +134,9 @@ const Catalogo = () => {
         handleEditInputChange={handleEditInputChange}
         handleEditImageChange={handleEditImageChange}
         handleEditProducto={handleEditProducto}
-        categorias={categorias}
-      />
+        categorias={categorias} />
     </Container>
   );
-};
+}
 
 export default Catalogo;

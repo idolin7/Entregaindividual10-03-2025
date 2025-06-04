@@ -46,7 +46,7 @@ const Encabezado = () => {
       <Container>
         <Navbar.Brand onClick={() => handleNavigate("/inicio")} className="text-white" style={{ cursor: "pointer" }}>
           <img alt="" src={logo} width="30" height="30" className="d-inline-block align-top" />{" "}
-          <strong>Ferreteria</strong>
+          <strong>Floristeria</strong>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="offcanvasNavbar-expand-sm" onClick={handleToggle} />
         <Navbar.Offcanvas
@@ -84,6 +84,14 @@ const Encabezado = () => {
               </Nav.Link>
 
               <Nav.Link
+                onClick={() => handleNavigate("/libros")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-house-door-fill me-2"></i> : null}
+                <strong>Libros</strong>
+              </Nav.Link>
+
+              <Nav.Link
                 onClick={() => handleNavigate("/productos")}
                 className={isCollapsed ? "color-texto-marca" : "text-white"}
               >
@@ -91,14 +99,40 @@ const Encabezado = () => {
                 <strong>Productos</strong>
               </Nav.Link>
 
+               <Nav.Link
+                onClick={() => handleNavigate("/pronunciacion")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-house-door-fill me-2"></i> : null}
+                <strong>Pronunciacion</strong>
+              </Nav.Link>
+
+               <Nav.Link
+                onClick={() => handleNavigate("/estadisticas")}
+                className={isCollapsed ? "color-texto-marca" : "text-white"}
+              >
+                {isCollapsed ? <i className="bi-house-door-fill me-2"></i> : null}
+                <strong>Estadistica</strong>
+              </Nav.Link>
 
               <Nav.Link
-                onClick={() => handleNavigate("/Catalogo")}
+                onClick={() => handleNavigate("/catalogo")}
                 className={isCollapsed ? "color-texto-marca" : "text-white"}
               >
                 {isCollapsed ? <i className="bi-house-door-fill me-2"></i> : null}
                 <strong>Catalogo</strong>
               </Nav.Link>
+
+              <Nav.Link
+              onClick={() => handleNavigate("/clima")}
+              className={isCollapsed ? "color-texto-marca" : "text-white"}
+               >
+           {isCollapsed ? <i className="bi-cloud-sun-fill me-2"></i> : null}
+           <strong>Clima</strong>
+
+</Nav.Link>
+
+
 
               {isLoggedIn ? (
                 <>
